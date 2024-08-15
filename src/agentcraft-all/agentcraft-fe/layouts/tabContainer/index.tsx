@@ -21,18 +21,18 @@ export function TabContainer(props: TabContainerProps) {
     }));
     const parentPath = currentNav.parentPath as string;
     return <>
-        <Box h={40} mt={8} pl={24} pr={24} >
+        <Box  mt={8} pl={24} pr={24} >
             <Flex align={'center'} justify={'space-between'}>
                 <>
                     {tabList.length === 1 ?
-                        <div style={{ height: 40, lineHeight: '40px' }}>{tabList[0].name}</div> :
-                        <Tabs
+                        <div>{tabList[0].name}</div> :
+                        <Tabs style={{height:"100%"}}
                             value={parentPath ? parentPath : router.pathname as string}
                             onTabChange={(value: string) => {
                                 router.push(value);
                             }}
                         >
-                            <Tabs.List>
+                            <Tabs.List style={{height:"100%"}}>
                                 {tabList.map((item) => <Tabs.Tab value={item.value} key={item.value} >{item.name}</Tabs.Tab>)}
                             </Tabs.List>
                         </Tabs>

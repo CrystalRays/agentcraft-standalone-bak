@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 // import { ServerlessBridgeService } from 'infra/alibaba-cloud/services/serverless-app';
 import request from 'utils/serverRequest';
 import { getTokenFromRequest } from 'utils/token';
-import { getAlibabaCloudServerlessBridge } from 'utils/cloudInfra';
+// import { getAlibabaCloudServerlessBridge } from 'utils/cloudInfra';
 
 export default async function handler(
     req: NextApiRequest,
@@ -31,14 +31,14 @@ export default async function handler(
     // }
 
     // const serverlessBridgeService = new ServerlessBridgeService(credential, mainAccountId);
-    const serverlessBridgeService = getAlibabaCloudServerlessBridge(headers);
+    // const serverlessBridgeService = getAlibabaCloudServerlessBridge(headers);
     let status = 200;
     const data: any = {
         code: 200,
     }
     try {
-        const result = await serverlessBridgeService.listFunctionV3();
-        const functions = result?.body?.functions || [];
+        // const result = await serverlessBridgeService.listFunctionV3();
+        const functions: any[] =  [];
         data.data = functions.map((item: any) => {
             return {
                 label: item.functionName,

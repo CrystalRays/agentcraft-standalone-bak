@@ -46,18 +46,21 @@ function List() {
         });
 
     }
+    console.log(foundationModelList);
     const rows = foundationModelList.map((element: any) => (
         <tr key={element.name}>
             <td >
-                <div style={{ width: 200, wordBreak: 'break-word' }}>
-                    <Link href={`/foundationModel/${element.name}/detail`}>{FM_NAME_MAP[element.template]}</Link>
+                <div style={{  wordBreak: 'break-word' }}>
+                    <Link href={`/foundationModel/${element.name}/detail`}>{element.name}</Link>
                 </div>
-                <div style={{ width: 200, wordBreak: 'break-word' }}>
-                    {element.name}
+                <div style={{  wordBreak: 'break-word' }}>
+                    {element.digest}
                 </div>
             </td>
-            <td>{formatDateTime(parseInt(element.createdTime))}</td>
-            <td> <a href={`https://fcnext.console.aliyun.com/applications/${element.name}/env/default?tab=envDetail`} target="_blank">访问云服务</a><Button ml={12} variant="filled" color="red" size="xs" onClick={() => removeFoundationModel(element.name)}>删除</Button></td>
+            <td>{element.modified_at}</td>
+            <td>{`${(element.size/1024**3).toFixed(2)} GB`}</td>
+            <td> <Button ml={12} variant="filled" color="red" size="xs" onClick={() => removeFoundationModel(element.name)}>删除</Button>
+            <Button ml={12} variant="filled" color="red" size="xs" onClick={() => removeFoundationModel(element.name)}>删除</Button></td>
         </tr>
     ));
     async function getAllFoundationModel() {
@@ -80,7 +83,8 @@ function List() {
                 <thead>
                     <tr>
                         <th>基础模型</th>
-                        <th>创建时间</th>
+                        <th>更新时间</th>
+                        <th>模型体积</th>
                         <th>操作</th>
                     </tr>
                 </thead>
@@ -106,11 +110,14 @@ export function FoundationModel() {
         <>
             {/* <Breadcrumbs>{items}</Breadcrumbs> */}
             <FeatureDescription title="基础模型" description="AgentCraft可以构建通义千问的商业化大语言模型服务也能够对魔搭社区，huggingface社区的开源模型进行托管。由此构建的基础模型服务可以作为您的AIGC应用的核心" />
-            <Box mt={12}>
+            <Flex mt={12} gap={'md'}>
                 <Button onClick={() => router.push('/foundationModel/create')}>
-                    创建基础模型
+                在线获取模型
                 </Button>
-            </Box>
+                <Button onClick={() => router.push('/foundationModel/upload')}>
+                上传本地模型
+                </Button>
+            </Flex>
             <List />
         </>
 

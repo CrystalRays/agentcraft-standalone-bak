@@ -7,6 +7,9 @@ body {
     overflow-y: auto;
     padding-left: 32px;
     padding-right: 32px;
+    display: flex;
+    flex-direction: column;
+
 }
 
 .content-container {

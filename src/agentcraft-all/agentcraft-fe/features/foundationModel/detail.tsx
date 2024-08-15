@@ -1,10 +1,12 @@
 import React, { useEffect } from "react";
 import { useRouter } from 'next/router'
-import { Anchor, Box, Text, Title, Paper, Flex, ActionIcon } from '@mantine/core';
+import { Anchor, Box, Text, Title, Paper, Flex, ActionIcon, Grid, } from '@mantine/core';
 import { IconArrowBackUp } from '@tabler/icons-react';
 import { useFoundationModelStore, getFoundationModel } from 'store/foundationModel';
 import { FM_APP_STATUS, FM_TEMPLATE_ACCESS_API_FUNCTION_MAP } from 'constants/foundation-model';
 import CopyToClipboard from 'components/CopyToClipboard';
+// import '@mantine/code-highlight/styles.css';
+import { Prism } from '@mantine/prism';
 // import styles from './index.module.scss';
 
 
@@ -37,51 +39,86 @@ function getLLMServiceUrl(currentFoundationModel: any) {
 
 function FoundationModelView({ fmId }: any) {
     const currentFoundationModel = useFoundationModelStore().currentFoundationModel;
+    
     const setCurrentFoundationModel = useFoundationModelStore().setCurrentFoundationModel;
 
     useEffect(() => {
         (async () => {
             const result = await getFoundationModel(fmId);
-            const _currentFoundationModel = result?.lastRelease;
+            // console.log(result)
+            const _currentFoundationModel = result;
             setCurrentFoundationModel(_currentFoundationModel);
 
         })()
 
     }, [fmId]);
-    const servcieURL = getLLMServiceUrl(currentFoundationModel);
+    // console.log(currentFoundationModel,currentFoundationModel.details)
+    const servcieURL = currentFoundationModel?.url;
     const deployStatus = FM_APP_STATUS[currentFoundationModel?.status] || { color: 'grey', text: '初始化' }
-    return <div>
-        <div>
-            <Title order={5} mb={8}>基础模型服务信息</Title>
-            <Paper shadow="xs" p="md" withBorder mb={12}>
-                <Title order={6} size="h6">应用信息</Title>
-                <Box pl={4} pr={4} >
-                    <div>
-                        <Flex align={'center'}>应用访问状态：<Text size="h6" color={deployStatus.color}>{deployStatus.text}</Text></Flex>
-                    </div>
-                </Box>
-            </Paper>
-            <Title order={5} mb={8}>访问接入</Title>
-            <Paper shadow="xs" p="md" withBorder mb={12}>
-                <Title order={6} size="h6">基础模型服务访问信息</Title>
-                {servcieURL ?
-                    <Box pl={4} pr={4} >
-                        <div>
-                            <Flex align={'center'}>API访问地址：<CopyToClipboard content={`${servcieURL}/v1/chat/completions`} value={`${servcieURL}/v1/chat/completions`} /></Flex>
+    return <div style={{overflow:"hidden",display: 'flex',flexDirection: 'column'}}>
+            <Title order={5} mb={8}>基本信息</Title>
+            <Grid >
+                <Grid.Col span={4} style={{display:"grid"}}>
+                <Paper shadow="xs" p="md" withBorder mb={12} >
+                    <Title order={6} size="h6">模型信息</Title>
+                    <Box pl={4} pr={4}>
+                        <div>{Object.keys(currentFoundationModel?.details||[]).map((name: string |any)=>(
+                            <Flex key={name} align={'center'} direction={'row'} wrap={'wrap'} justify={"space-between"} style={{wordWrap :"break-word",wordBreak:"break-all"}}>
+                                {name}: <Text size="h6" >{currentFoundationModel.details[name]}</Text>
+                            </Flex>
+                        ))
+                            }
+                            
                         </div>
-                    </Box> : null}
-            </Paper>
-            <Title order={5} mb={8}>云资源信息</Title>
-            <Paper shadow="xs" p="md" withBorder >
+                    </Box>
+                </Paper>
+                </Grid.Col>
+                <Grid.Col span={8} style={{display:"grid"}}>
+                
+                    <Paper shadow="xs" p="md" withBorder mb={12}>
+                    <Flex align={'center'}  direction={'row'} wrap={'wrap'} justify={"space-between"} ><Title order={6} size="h6">访问接口</Title><CopyToClipboard content={`${servcieURL}`} value={`${servcieURL}`} /></Flex>
+                        {servcieURL ?
+                           <Box pl={4} pr={4} >
+                                <Flex align={'center'} direction={'row'} justify={"space-between"}>API调用示例：</Flex>
+                                <Prism language="bash" style={{display:"grid"}}>{`curl ${servcieURL} -H "Content-Type: application/json"  -d '{ 
+  "model": "${fmId}",
+  "messages": [ 
+    {"role": "system","content": "You are a helpful assistant."},
+    {"role": "user","content": "Hello!"}
+  ]}'
+`}</Prism>
 
-                <Title order={6} size="h6">函数计算应用信息</Title>
-                <Box pl={4} pr={4} >
-                    <div>
-                        <span>应用名：{`${currentFoundationModel?.appName}`}</span>
-                    </div>
-                </Box>
-            </Paper>
-        </div>
+                        </Box>: null}
+                            
+                    </Paper>
+                </Grid.Col>
+            </Grid>
+            
+            <Title order={5} mb={8}>详细信息</Title>
+            <Grid style={{overflow:'auto'}}>
+                <Grid.Col span={4} style={{display:"grid",height:'100%'}}>
+                    <Paper shadow="xs" p="md" withBorder mb={12} >
+                        <Title order={6} size="h6">模型信息</Title>
+                        <Box pl={4} pr={4}>
+                            <div >{Object.keys(currentFoundationModel?.model_info||[]).map((name: string |any)=>(
+                                <Flex key={name} align={'center'} direction={'row'} wrap={'wrap'} justify={"space-between"} style={{wordWrap :"break-word",wordBreak:"break-all"}}>
+                                    {name}: <Text size="h6" >{currentFoundationModel.model_info[name]}</Text>
+                                </Flex>
+                            ))
+                                }
+                                
+                            </div>
+                        </Box>
+                    </Paper>
+                </Grid.Col>
+                <Grid.Col span={8} style={{display:"flex",height:'100%',flexDirection:'column',}}>
+                    <Paper shadow="xs" p="md" withBorder style={{display:'flex',flexDirection:'column',overflow:'auto',marginBottom:'0.75rem'}} >
+
+                        <Title order={6} size="h6">配置文件</Title>
+                        <Prism language="bash" style={{display:"grid",overflow:'auto'}}>{currentFoundationModel?.modelfile||''}</Prism>
+                    </Paper>
+                </Grid.Col>
+            </Grid>
     </div>
 }
 
@@ -114,9 +151,9 @@ export function FoundationModelDetail() {
                 </Flex>
             </Flex>
             {/* <FeatureDescription title={`${fmId}详情`} description="依托阿里云Serverless的丰富应用模版以及完整的工具链，AgentCraft可以创建丰富多样的基础模型服务" /> */}
-            <Box mt={12} >
+            <Flex mt={12}   style={{overflow:"auto"}} direction={'column'}>
                 <FoundationModelView fmId={fmId} />
-            </Box>
+            </Flex>
         </>
     );
 }

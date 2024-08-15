@@ -57,12 +57,13 @@ export async function getModelList() {
 export async function getFmAppList() {
     const state = useModelStore.getState();
     const updateFmList = state.updateFmList;
-    const res = await request("/api/infra/alibaba-cloud/listFMAppUrl?appFilter=AgentCraft_FM");
+    const res = await request("/api/ollama/listApp?onlyurl=true");
     const fmAppList = await res.data;
     if (fmAppList) {
         updateFmList(fmAppList);
     }
 }
+
 
 export async function deleteModel(id: number) {
     return await request(`/api/model/delete?id=${id}`, {

@@ -1,5 +1,5 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { getAlibabaCloudServerlessBridge } from 'utils/cloudInfra';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { show } from '@/utils/ollama';
 // import { ServerlessBridgeService } from '@/infra/alibaba-cloud/services/serverless-app';
 
 
@@ -24,15 +24,15 @@ export default async function handler(
     //     }
     // }
     // const serverlessBridgeService = new ServerlessBridgeService(credential);
-    const serverlessBridgeService = getAlibabaCloudServerlessBridge(headers);
+    // const serverlessBridgeService = getAlibabaCloudServerlessBridge(headers);
     let status = 200;
     let data: any = {
         code: 200,
     }
     try {
-        const result = await serverlessBridgeService.getApplication(appName);
-        data.code = result.statusCode;
-        data.data = result.body;
+        const result = await show(appName);
+        data.code = result.status;
+        data.data = {url:process.env.ollamaApi+"/v1/chat/completions",...result.data};
     } catch (e: any) {
         status = 500;
         data.code = status;

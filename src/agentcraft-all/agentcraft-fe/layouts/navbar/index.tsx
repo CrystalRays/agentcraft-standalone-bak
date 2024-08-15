@@ -28,7 +28,7 @@ export const Nav = (props: NavProps) => {
     const handleClick = (path: string) => {
         router.push(`${path.replace('[id]', id).replace('[knowledgeBaseId]', knowledgeBaseId)}`)
     };
-    const parentPath = currentNav.parentPath as string;
+    const parentPath = '';//currentNav.parentPath as string;
     return (
         <Navbar className={styles.navbar} width={{ base: parentPath ? CLOSE_NAV_WIDTH : EXPAND_NAV_WIDTH }} p="xs">
             <WorkSpace {...props} parentPath={parentPath} />

@@ -34,7 +34,7 @@ function Shell(props: any) {
     useEffect(() => {
         getWorkspaceListAndSetCurrent();
     }, []);
-    const parentPath = currentNav.parentPath as string;
+    const parentPath = '';currentNav.parentPath as string;
     return <AppShell
         padding="md"
         navbar={<Nav {...subComponentProps} />}

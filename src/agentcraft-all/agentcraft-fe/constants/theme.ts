@@ -8,7 +8,9 @@ const THEME: any = {
         AppShell: {
             styles: {
                 main: {
-                    height: '100hv'
+                    height: '100vh',
+                    display:'flex',
+                    "flex-direction": 'column'
                 },
             }
         },

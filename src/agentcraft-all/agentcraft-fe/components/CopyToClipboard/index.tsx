@@ -68,7 +68,7 @@ export default function CopyToClipboard({ value, content, truncate, width = 'aut
     return <Tooltip label={clipboard.copied ? '已复制' : '复制'} withArrow position={position} >
         <Flex
             onClick={() => clipboard.copy(value)}
-            mih={50}
+            // mih={50}
             style={{ width }}
             gap="xs"
             justify="flex-start"

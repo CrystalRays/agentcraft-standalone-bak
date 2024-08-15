@@ -1,7 +1,6 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { getAlibabaCloudServerlessBridge } from 'utils/cloudInfra';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import {create} from '@/utils/ollama';
 // import { ServerlessBridgeService } from '@/infra/alibaba-cloud/services/serverless-app';
-
 
 interface ServerlessAppRequestBody {
     name: string,
@@ -26,8 +25,9 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    const appName:any = req.query.appName;
+    const body: any = req.body;
     const headers = req.headers;
+    // const mainAccountId = process.env.FC_ACCOUNT_ID || headers['x-fc-account-id'];
     // const accessKeyId: any = process.env.ALIBABA_CLOUD_ACCESS_KEY_ID || headers['x-fc-access-key-id'];
     // const accessKeySecret: any = process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET || headers['x-fc-access-key-secret'];
     // const securityToken: any = process.env.ALIBABA_CLOUD_SECURITY_TOKEN || headers['x-fc-security-token'];
@@ -40,15 +40,19 @@ export default async function handler(
     //     }
     // }
     // const serverlessBridgeService = new ServerlessBridgeService(credential);
-    const serverlessBridgeService =  getAlibabaCloudServerlessBridge(headers);
+    // const serverlessBridgeService = getAlibabaCloudServerlessBridge(headers);
+    const { modelfile = '', name = ''} = body;
+    //    region: process.env.Region || 'cn-hangzhou',
+    // await serverlessBridgeService.getMainOrCreateAccountRole();
     let status = 200;
-    let data: any = {
+    const data: any = {
         code: 200,
     }
     try {
-        const result = await serverlessBridgeService.deleteApplication(appName);
-        data.code = result.statusCode;
-        data.data = result;
+        const result = await create(name,modelfile);
+        data.code=result.status;
+        data.data = result.data;
+
     } catch (e: any) {
         status = 500;
         data.code = status;

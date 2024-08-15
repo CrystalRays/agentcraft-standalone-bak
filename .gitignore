@@ -4,6 +4,13 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+*.ps1
+.python-version
+.vscode
+Pipfile
+*.lock
+* text=auto
+
 # C extensions
 *.so
 

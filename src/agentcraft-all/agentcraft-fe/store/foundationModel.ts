@@ -73,8 +73,8 @@ export const useFoundationModelStore = create<FoundationModelStore>()(devtools((
 export async function getFoundationModelList() {
     const state = useFoundationModelStore.getState();
     const updateFoundationModelList = state.updateFoundationModelList;
-    const res = await request(`/api/infra/alibaba-cloud/listApps?appFilter=${AGENTCRAFT_FM_PREFIX}`);
-    const foundationModelList = res.data;
+    const res = await request(`/api/ollama/listApps`);
+    const foundationModelList = res.data?.models;
     if (foundationModelList)
         updateFoundationModelList(foundationModelList);
 
@@ -84,7 +84,7 @@ export async function getFoundationModelList() {
 
 export async function getFoundationModel(appName: string) {
 
-    const res = await request(`/api/infra/alibaba-cloud/getApp?appName=${appName}`);
+    const res = await request(`/api/ollama/getApp?appName=${appName}`);
     return res.data;
 
 }
@@ -92,7 +92,7 @@ export async function getFoundationModel(appName: string) {
 
 
 export async function deleteFoundationModel(appName: string) {
-    return await request(`/api/infra/alibaba-cloud/deleteApp?appName=${appName}`, {
+    return await request(`/api/ollama/deleteApp?appName=${appName}`, {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json",
@@ -101,7 +101,7 @@ export async function deleteFoundationModel(appName: string) {
 }
 
 export async function addFoundationModel(template: string, payload: any) {
-    const res = await request(`/api/infra/alibaba-cloud/createApp?template=${template}`, {
+    const res = await request(`/api/ollama/createApp?template=${template}`, {
         method: "POST",
         body: JSON.stringify(payload),
         headers: {

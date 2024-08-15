@@ -85,7 +85,7 @@ export async function getClientAccessList() {
 
     const state = useClientAccessStore.getState();
     const updateClientAccessList = state.updateClientAccessList;
-    const res = await request(`/api/infra/alibaba-cloud/listApps?appFilter=${AGENTCRAFT_CLIENT_PREFIX}`);
+    const res = await request(`/api/client/listApps?appFilter=${AGENTCRAFT_CLIENT_PREFIX}`);
     const clientAccessList = res.data;
     if (clientAccessList)
         updateClientAccessList(clientAccessList);
@@ -93,7 +93,7 @@ export async function getClientAccessList() {
 }
 
 export async function deleteClientAccess(appName: string) {
-    return await request(`/api/infra/alibaba-cloud/deleteApp?appName=${appName}`, {
+    return await request(`/api/client/deleteApp?appName=${appName}`, {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json",
