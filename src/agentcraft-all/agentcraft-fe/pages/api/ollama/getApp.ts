@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { show } from '@/utils/ollama';
+import request  from '@/utils/ollama';
 // import { ServerlessBridgeService } from '@/infra/alibaba-cloud/services/serverless-app';
 
 
@@ -30,7 +30,7 @@ export default async function handler(
         code: 200,
     }
     try {
-        const result = await show(appName);
+        const result = await request.post("/api/show",{name:name});
         data.code = result.status;
         data.data = {url:process.env.ollamaApi+"/v1/chat/completions",...result.data};
     } catch (e: any) {

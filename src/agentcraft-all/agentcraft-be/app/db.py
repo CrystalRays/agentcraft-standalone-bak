@@ -50,6 +50,17 @@ CREATE_MODEL_TABLE = text(
     timeout INTEGER NOT NULL DEFAULT 600
     );"""
 )
+CREATE_OLLAMA_TABLE = text(
+    """CREATE TABLE IF NOT EXISTS ollama (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    labels VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    tags TEXT NOT NULL,
+    updated TIMESTAMP NOT NULL DEFAULT NOW(),
+    synced TIMESTAMP NOT NULL DEFAULT NOW()
+    );"""
+)
 CREATE_AGENT_TABLE = text(
     """CREATE TABLE IF NOT EXISTS agent (
     id BIGSERIAL PRIMARY KEY,
@@ -335,7 +346,7 @@ def create_tables():
         session.execute(CREATE_QUESTION_TABLE)
         session.execute(CREATE_DOCUMENT_INDEX)
         session.execute(CREATE_QUESTION_INDEX)
-
+        session.execute(CREATE_OLLAMA_TABLE)
         session.execute(CREATE_ASSISTANT_TABLE)
         session.execute(CREATE_ASSISTANT_DATASET_TABLE)
         session.execute(CREATE_ACTION_TOOLS_TABLE)

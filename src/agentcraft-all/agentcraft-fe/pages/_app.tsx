@@ -48,7 +48,7 @@ export default function App(props: AppProps) {
             `,
         }}>
         </script>
-        <Notifications />
+        <Notifications position="bottom-center" zIndex={2077} />
         {render ?
           <ModalsProvider>
             {!hiddenConfigView ? < SystemConfig /> : <Main><Component {...pageProps} /></Main>}

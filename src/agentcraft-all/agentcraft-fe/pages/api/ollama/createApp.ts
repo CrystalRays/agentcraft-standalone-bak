@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import {create} from '@/utils/ollama';
+import request from '@/utils/ollama';
 // import { ServerlessBridgeService } from '@/infra/alibaba-cloud/services/serverless-app';
 
 interface ServerlessAppRequestBody {
@@ -49,7 +49,7 @@ export default async function handler(
         code: 200,
     }
     try {
-        const result = await create(name,modelfile);
+        const result = await request.post("/api/create",{name,modelfile});
         data.code=result.status;
         data.data = result.data;
 

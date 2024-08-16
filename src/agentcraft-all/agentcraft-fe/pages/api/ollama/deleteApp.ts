@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { del } from '@/utils/ollama';
+import request from '@/utils/ollama';
 // import { ServerlessBridgeService } from '@/infra/alibaba-cloud/services/serverless-app';
 
 
@@ -46,7 +46,7 @@ export default async function handler(
         code: 200,
     }
     try {
-        const result = await del(appName);
+        const result = await request.delete("/api/delete",{data:{name:name}});
         data.code = result.status;
         data.data = result.data;
     } catch (e: any) {

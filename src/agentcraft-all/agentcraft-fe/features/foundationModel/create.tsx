@@ -1,14 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useRouter } from 'next/router';
 import { nanoid } from 'nanoid';
 
-import { Breadcrumbs, Anchor, Loader, Stepper, Card, Button, Box, Select, PasswordInput, Group, Tabs, Notification, Image, Badge, Title, TextInput, Text, ActionIcon, Highlight, LoadingOverlay, Modal, Textarea, Flex, Space, NumberInput, FileInput, rem } from '@mantine/core';
+import { Breadcrumbs, Anchor, Loader, Stepper, Card, Button, Box, Select, PasswordInput, Group, Tabs, Notification, Image, Badge, Title, TextInput, Text, ActionIcon, Highlight, LoadingOverlay, Modal, Textarea, Flex, Space, NumberInput, FileInput, rem, SegmentedControl } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconMessageCircle, IconExternalLink, IconArrowBackUp } from '@tabler/icons-react';
+import { IconMessageCircle, IconExternalLink, IconArrowBackUp, IconBrandGithubFilled, IconPhoto } from '@tabler/icons-react';
 import { useFoundationModelStore, addFoundationModel, getFoundationModel, APP_STATUS } from 'store/foundationModel';
 import { FORM_WIDTH } from 'constants/index';
 import { FOUNDATION_MODEL_TEMPLATES, AGENTCRAFT_FM_PREFIX } from 'constants/foundation-model';
 import { ServerlessAppTemplate, TemplateParams, TemplatePropertyDetail } from 'types/serverless-devs-app';
+import {request} from "@/utils/clientRequest"
+import { validate } from "langchain/dist/util/fast-json-patch";
 // import styles from './index.module.scss';
 
 function LoadingStepper() {
@@ -162,13 +164,38 @@ function FoundationModelTab() {
         setFmTemplate(Object.assign({}, item.templateParams, { template: item.template, description: item.description }));
         setOpen(true);
     }
+    const form=useForm({validateInputOnChange: true ,initialValues:{q:"",c:""},validate: {
+        q: (value) => { getPagecontent();return null;},
+        c: (value) => { getPagecontent();return null;},
+      },});
+    const pagecontent: {[key: string]: any}={};
+    const getPagecontent = async () => {
+        pagecontent.data = await request(`/api/ollama/search?q=${form.values.q}&c=${form.values.c}`);
+    };
+    useEffect(()=>{
+        getPagecontent()
+    },[form.values.q, form.values.c])
     return <Box pos="relative" pb={124} mt={12}>
         <Tabs variant="outline" defaultValue="text2text">
             <Tabs.List>
-                <Tabs.Tab value="text2text" icon={<IconMessageCircle size="0.8rem" />}>文本生成</Tabs.Tab>
-                {/* <Tabs.Tab value="text2img" icon={<IconPhoto size="0.8rem" />}>图像生成</Tabs.Tab> */}
+                <Tabs.Tab value="text2text" icon={<IconMessageCircle size="0.8rem" />}>Ollama</Tabs.Tab>
+                {/* <Tabs.Tab value="text2img" icon={<IconMessageCircle size="0.8rem" />}>Huggingface</Tabs.Tab> */}
             </Tabs.List>
             <Tabs.Panel value="text2text" pt="xs">
+                <TextInput placeholder="Search models" {...form.getInputProps('s')} />
+                <SegmentedControl
+                
+                color="gray"
+                // style={{background:'white'}}
+                {...form.getInputProps('c')}
+                data={[
+                    { label: 'All', value: '' },
+                    { label: 'Embedding', value: 'Embedding' },
+                    { label: 'Vision', value: 'Vision' },
+                    { label: 'Tools', value: 'Tools' },
+                    { label: 'Code', value: 'Code' },
+                ]}
+                />
                 <Flex
                     mih={50}
                     gap="md"
@@ -178,7 +205,10 @@ function FoundationModelTab() {
                     wrap="wrap"
                     pb={120}
                 >
-                    {FOUNDATION_MODEL_TEMPLATES.map((item: any, index: number) => {
+                    {/* { pagecontent} */}
+
+                    {pagecontent?pagecontent.data?.map((item: any, index: number) => {
+                        console.log(item)
                         return <Card shadow="sm" padding="lg" radius="md" withBorder style={{ width: 320 }} mr={12} key={`template-${index}`}>
                             <Card.Section >
                                 {item.icon ? <Image
@@ -194,9 +224,9 @@ function FoundationModelTab() {
                             </Card.Section>
                             <Group mb={8} h={45} >
                                 <Text weight={300} align={'center'} style={{ textAlign: 'center', width: '100%' }}>{item.name}</Text>
-                                {/* {
+                                {
                                     item.githubLink ? <a href={item.githubLink} target="_blank"><IconBrandGithubFilled /></a> : null
-                                } */}
+                                }
                             </Group>
                             <Box>
                                 {item.tag.map((tag:string) => {
@@ -221,11 +251,11 @@ function FoundationModelTab() {
                                 </a>
                             </Flex>
                         </Card>
-                    })}
+                    }):null}
                 </Flex>
             </Tabs.Panel>
-
-            {/* <Tabs.Panel value="text2img" pt="xs">
+{/* 
+            <Tabs.Panel value="text2img" pt="xs">
                 <Flex
                     mih={50}
                     gap="md"

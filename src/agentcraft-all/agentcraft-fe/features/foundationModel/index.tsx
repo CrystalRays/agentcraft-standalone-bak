@@ -11,6 +11,7 @@ import FeatureDescription from '@/components/FeatureDescription';
 
 import { FM_NAME_MAP } from 'constants/foundation-model';
 import { formatDateTime } from 'utils/index';
+import { Notifications } from "@mantine/notifications";
 // import { FORM_WIDTH } from 'constants/index';
 // import styles from './index.module.scss';
 
@@ -46,7 +47,7 @@ function List() {
         });
 
     }
-    console.log(foundationModelList);
+    // console.log(foundationModelList);
     const rows = foundationModelList.map((element: any) => (
         <tr key={element.name}>
             <td >
@@ -59,7 +60,7 @@ function List() {
             </td>
             <td>{element.modified_at}</td>
             <td>{`${(element.size/1024**3).toFixed(2)} GB`}</td>
-            <td> <Button ml={12} variant="filled" color="red" size="xs" onClick={() => removeFoundationModel(element.name)}>删除</Button>
+            <td> 
             <Button ml={12} variant="filled" color="red" size="xs" onClick={() => removeFoundationModel(element.name)}>删除</Button></td>
         </tr>
     ));
@@ -109,6 +110,7 @@ export function FoundationModel() {
     return (
         <>
             {/* <Breadcrumbs>{items}</Breadcrumbs> */}
+            
             <FeatureDescription title="基础模型" description="AgentCraft可以构建通义千问的商业化大语言模型服务也能够对魔搭社区，huggingface社区的开源模型进行托管。由此构建的基础模型服务可以作为您的AIGC应用的核心" />
             <Flex mt={12} gap={'md'}>
                 <Button onClick={() => router.push('/foundationModel/create')}>

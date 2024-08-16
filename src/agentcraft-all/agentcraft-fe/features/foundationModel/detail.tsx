@@ -51,7 +51,7 @@ function FoundationModelView({ fmId }: any) {
 
         })()
 
-    }, [fmId]);
+    }, [fmId, setCurrentFoundationModel]);
     // console.log(currentFoundationModel,currentFoundationModel.details)
     const servcieURL = currentFoundationModel?.url;
     const deployStatus = FM_APP_STATUS[currentFoundationModel?.status] || { color: 'grey', text: '初始化' }

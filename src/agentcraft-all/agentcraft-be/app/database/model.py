@@ -22,7 +22,17 @@ class Model(postgresql.BaseModel):
     modified = mapped_column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
     user_id = mapped_column(ForeignKey("users.id", ondelete="cascade"))
     timeout = mapped_column(Integer, default=600, nullable=False)  # seconds
+class ollamaModel(postgresql.BaseModel):
+    """ollama Model"""
+    __tablename__ = "ollama"
 
+    id = mapped_column(Integer, primary_key=True, index=True)
+    name = mapped_column(String, nullable=False)  # Used for request
+    description = mapped_column(String, nullable=False)
+    tags = mapped_column(String, nullable=False)
+    labels= mapped_column(String, nullable=False)
+    updated = mapped_column(TIMESTAMP, default=func.now(), nullable=False)
+    synced = mapped_column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
 
 def list_models(user_id: int, page: int = 0, limit: int = 3000) -> tuple[list[Model], int]:
     """获取模型列表"""
@@ -71,3 +81,24 @@ def update_model(model_id: int, user_id: int,**kwargs):
         session.query(Model).filter(
             Model.id == model_id, Model.user_id == user_id).update(kwargs)
         session.commit()
+
+def update_models(data):
+    '''更新ollama库'''
+
+
+    with Session(postgresql.postgres) as session:
+        for line in data:
+            model1 = session.query(ollamaModel).filter( ollamaModel.name == line[0]).first()
+            obj=dict(zip(('name','description','labels','tags','updated'),line))
+            if model1:
+                session.query(ollamaModel).filter(ollamaModel.name == line[0]).update(obj)
+            else:
+                session.add(obj)
+        session.commit()
+def search_models(q,c,p,l):
+        with Session(postgresql.postgres) as session:
+            data = session.query(ollamaModel).filter(ollamaModel.name.like(f"%{q}%"),ollamaModel.labels.like(f"%c%")).order_by(
+                ollamaModel.updated.desc()).offset(
+                p * l).limit(l).all()
+            total = session.query(ollamaModel).filter(ollamaModel.name.like(f"%{q}%"),ollamaModel.labels.like(f"%c%")).count()
+        return data, total
