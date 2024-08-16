@@ -55,7 +55,7 @@ npm run dev
 1. download ollama at ollama.com
 2. install pyenv-win instead of pyenv
 3. use `set PYTHONPATH=%PYTHONPATH%;%cd%` in cmd or `$env:PYTHONPATH="$env:PYTHONPATH;$pwd"` in powershell instead
-### Progress
+## Progress
 - [ ] 基础模型 -> ollama
   - [x] 基础模型 -> ollama list
   - [x] 基础模型详细 -> ollama show
