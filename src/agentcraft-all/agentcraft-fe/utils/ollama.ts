@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { IconX } from '@tabler/icons-react';
-import { notifications } from '@mantine/notifications';
+// import { IconX } from '@tabler/icons-react';
+// import { notifications } from '@mantine/notifications';
 
 const request = axios.create({
     baseURL: process.env.ollamaApi || '',

@@ -36,7 +36,7 @@ export default async function handler(
         const token = getTokenFromRequest(req);
         request.defaults.headers.common['Authorization'] = token; 
         const result = await request.get("/model/search",{params:{q:q,c:c,p:p,l:l}});
-        console.log(result.data,result)
+        // console.log(result.data,result)
         data.code = result.status;
         // const agentCraftAppList = .result;
         data.data = result.data;//agentCraftAppList.filter((item: any) => item.name.indexOf(appFilter) === 0 || (item.name.indexOf('AgentCraftApp') === 0 && appFilter === 'AgentCraft_FM')); //兼容最开始的FM命名

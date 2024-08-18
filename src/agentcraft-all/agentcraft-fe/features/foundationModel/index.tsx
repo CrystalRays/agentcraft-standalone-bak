@@ -8,10 +8,6 @@ import { modals } from '@mantine/modals';
 import { useFoundationModelStore, getFoundationModelList, deleteFoundationModel } from '@/store/foundationModel';
 
 import FeatureDescription from '@/components/FeatureDescription';
-
-import { FM_NAME_MAP } from 'constants/foundation-model';
-import { formatDateTime } from 'utils/index';
-import { Notifications } from "@mantine/notifications";
 // import { FORM_WIDTH } from 'constants/index';
 // import styles from './index.module.scss';
 

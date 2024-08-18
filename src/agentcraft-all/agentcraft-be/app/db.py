@@ -56,9 +56,10 @@ CREATE_OLLAMA_TABLE = text(
     name VARCHAR(255) NOT NULL,
     labels VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
-    tags TEXT NOT NULL,
+    tags TEXT NOT NULL DEFAULT '[]',
     updated TIMESTAMP NOT NULL DEFAULT NOW(),
-    synced TIMESTAMP NOT NULL DEFAULT NOW()
+    synced TIMESTAMP NOT NULL DEFAULT NOW(),
+    pulls INTEGER NOT NULL DEFAULT 0
     );"""
 )
 CREATE_AGENT_TABLE = text(
@@ -358,3 +359,8 @@ def create_tables():
         session.execute(CREATE_ASSISTANT_CHAT_TABLE)
         session.execute(CREATE_ASSISTANT_SESSION_CHAT_TABLE)
         session.commit()
+    with postgres.begin() as connection:
+        sql_statements = open("app/ollama.sql","r",encoding="utf-8").read()
+        try:connection.execute(text(sql_statements))
+        except:pass
+        

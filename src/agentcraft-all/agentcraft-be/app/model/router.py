@@ -36,7 +36,7 @@ async def add_model(req: UpsertModelRequest, token: JWTData = Depends(validate_t
         }
     }
 @router.get("/search", response_model=DictListResponse)
-async def search_model(q: str, c: str, p:int=1,l:int=10, token: JWTData = Depends(validate_token)):
+async def search_model(q: str, c: str, p:int=0,l:int=10, token: JWTData = Depends(validate_token)):
     """更新模型信息"""
     data, total,updated=service.search_model(q=q,c=c,p=p,l=l)
     if datetime.datetime.now() - updated > datetime.timedelta(days=7) and not lock.locked():
