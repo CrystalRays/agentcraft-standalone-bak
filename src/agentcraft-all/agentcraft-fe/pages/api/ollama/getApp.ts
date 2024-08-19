@@ -30,7 +30,7 @@ export default async function handler(
         code: 200,
     }
     try {
-        const result = await request.post("/api/show",{name:name});
+        const result = await request.post("/api/show",{name:appName});
         data.code = result.status;
         data.data = {url:process.env.ollamaApi+"/v1/chat/completions",...result.data};
     } catch (e: any) {

@@ -59,10 +59,10 @@ npm run dev
 - [ ] 基础模型 -> ollama
   - [x] 基础模型 -> ollama list
   - [x] 基础模型详细 -> ollama show
-  - [ ] 在线获取模型 -> ollama pull
+  - [x] 在线获取模型 -> ollama pull
     - [x] 后端自动获取并更新模型列表
-    - [ ] 前端显示可用模型列表
-    - [ ] 前端创建模型对话框
+    - [x] 前端显示可用模型列表
+    - [ ] 前端创建模型流式进度提示
   - [ ] 上传本地模型 -> ollama upload 
   - [x] 删除模型 -> ollama delete
 - [ ] 智能体 ->crewai

@@ -46,7 +46,7 @@ export default async function handler(
         code: 200,
     }
     try {
-        const result = await request.delete("/api/delete",{data:{name:name}});
+        const result = await request.delete("/api/delete",{data:{name:appName}});
         data.code = result.status;
         data.data = result.data;
     } catch (e: any) {

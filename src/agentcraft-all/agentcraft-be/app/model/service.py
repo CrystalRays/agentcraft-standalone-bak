@@ -90,9 +90,9 @@ def fetch_models(lock):
                 describe=card.select_one('p.max-w-md.break-words')
                 describe=describe.get_text().strip() if describe else ""
                 labels=json.dumps(list(map(lambda x:x.get_text().strip(),card.select('div > span'))))
-                pulls=card.select('p > span:nth-child(1)').get_text().strip()
-                pulls=pulls.split(" ")[0].strip()if "pulls" in pulls else 0
-                pulls=int(pulls[:-1])*1000000 if pulls[-1]=="M" else int(pulls[:-1])*1000 if pulls[-1]=="K" else int(pulls)
+                pulls=card.select_one('p > span:nth-child(1)').get_text().strip()
+                pulls=pulls.split(" ")[0].strip().replace(",","") if "Pulls" in pulls else '0'
+                pulls=float(pulls[:-1])*1000000 if pulls[-1]=="M" else float(pulls[:-1])*1000 if pulls[-1]=="K" else float(pulls)
                 updated=getdate(card.select_one('p > span:last-child').get_text().strip().splitlines()[1].strip()).date()
                 datalock.acquire()
                 # print([title,describe,labels,updated])
@@ -138,7 +138,7 @@ def fetch_models(lock):
             if i%10==0:print(f"{i}/{pages} models finished")
         titles=list(data)
         try:
-            for each in as_completed(map(lambda p:threadpool.submit(gettags,p),data),timeout=900):
+            for each in as_completed(map(lambda p:threadpool.submit(gettags,p),data),timeout=1200):
                 title=each.result()
                 titles.remove(title)
                 try:width=os.get_terminal_size().columns

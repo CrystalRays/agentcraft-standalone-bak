@@ -10,6 +10,10 @@ __pycache__/
 Pipfile
 *.lock
 * text=auto
+b/
+*.txt
+*.7z
+/*.py
 
 # C extensions
 *.so

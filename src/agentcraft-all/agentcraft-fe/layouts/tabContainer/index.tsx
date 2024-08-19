@@ -40,9 +40,9 @@ export function TabContainer(props: TabContainerProps) {
                 <Header />
             </Flex>
         </Box>
-        <Box bg={'#fff'} pl={32} pr={32} h={'calc(100vh - 48px)'} className={'page-container'} >
+        <Flex bg={'#fff'} pl={32} pr={32} className={'page-container'} >
             {props.children}
-        </Box>
+        </Flex>
     </>
 
 

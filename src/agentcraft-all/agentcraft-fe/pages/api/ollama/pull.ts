@@ -58,18 +58,12 @@ export default async function handler(
         console.log("pulling")
         const result = await request.post("/api/pull",{name});
         const stream = result.data as unknown as Readable
-        stream.on('data', (chunk) => {
-            console.log("receiving")
-        res.write(chunk)
-        })
-
-        stream.on('end', () => {
-        res.end()
-        })
+        return res.send(stream);
     } catch (e: any) {
         status = 500;
         data.code = status;
         data.error = e.message
+        return res.status(status).json(data);
     }
-    // res.status(status).json(data);
+    // 
 }

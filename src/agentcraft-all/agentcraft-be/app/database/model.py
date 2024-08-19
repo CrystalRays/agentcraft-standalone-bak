@@ -35,6 +35,7 @@ class ollamaModel(postgresql.BaseModel):
     labels= mapped_column(String, nullable=False)
     updated = mapped_column(TIMESTAMP, default=func.now(), nullable=False)
     synced = mapped_column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
+    pulls= mapped_column(Integer, nullable=False,default=0)
 
 def list_models(user_id: int, page: int = 0, limit: int = 3000) -> tuple[list[Model], int]:
     """获取模型列表"""
@@ -107,7 +108,7 @@ def update_models(data):
 def search_models(q,c,p,l):
         with Session(postgresql.postgres) as session:
             data = session.query(ollamaModel).filter(ollamaModel.name.like(f"%{q}%"),ollamaModel.labels.like(f"%{c}%")).order_by(
-                ollamaModel.updated.desc()).offset(
+                ollamaModel.pulls.desc()).offset(
                 p * l).limit(l).all()
             total = session.query(ollamaModel).filter(ollamaModel.name.like(f"%{q}%"),ollamaModel.labels.like(f"%{c}%")).count()
         return data, total

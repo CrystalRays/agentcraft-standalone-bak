@@ -8,6 +8,7 @@ import { modals } from '@mantine/modals';
 import { useFoundationModelStore, getFoundationModelList, deleteFoundationModel } from '@/store/foundationModel';
 
 import FeatureDescription from '@/components/FeatureDescription';
+import { notifications } from "@mantine/notifications";
 // import { FORM_WIDTH } from 'constants/index';
 // import styles from './index.module.scss';
 
@@ -35,6 +36,11 @@ function List() {
                 try {
                     await deleteFoundationModel(appName);
                     await getFoundationModelList();
+                    notifications.show({
+                        title: '删除成功',
+                        message: `您已删除基础模型${appName}`,
+                        color: 'green',
+                    })
                 } catch (e) {
                     console.log(e);
                 }

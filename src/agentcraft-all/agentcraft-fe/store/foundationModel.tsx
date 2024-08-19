@@ -3,7 +3,8 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { request } from 'utils/clientRequest';
 // import { AGENTCRAFT_FM_PREFIX } from 'constants/foundation-model';
-
+import { notifications } from '@mantine/notifications';
+import { IconCheck, IconX } from '@tabler/icons-react';
 
 export const enum APP_STATUS {
     INIT = 1,
@@ -74,9 +75,22 @@ export async function getFoundationModelList() {
     const state = useFoundationModelStore.getState();
     const updateFoundationModelList = state.updateFoundationModelList;
     const res = await request(`/api/ollama/listApps`);
-    const foundationModelList = res.data?.models;
-    if (foundationModelList)
-        updateFoundationModelList(foundationModelList);
+    // console.log(res)
+    if(res.code==200){
+        const foundationModelList = res.data?.models;
+        if (foundationModelList)
+            updateFoundationModelList(foundationModelList);
+    }
+    else{
+        notifications.show({
+            title: 'Ollama Api Service Error',
+            message: res.data?.message,
+            icon: <IconX />,
+            color:'red'
+          })
+    }
+    
+    
 
 }
 

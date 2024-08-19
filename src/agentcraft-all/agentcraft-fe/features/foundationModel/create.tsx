@@ -4,7 +4,7 @@ import { nanoid } from 'nanoid';
 
 import { Breadcrumbs, Anchor, Loader, Stepper, Card, Button, Box, Select, PasswordInput, Group, Tabs, Notification, Image, Badge, Title, TextInput, Text, ActionIcon, Highlight, LoadingOverlay, Modal, Textarea, Flex, Space, NumberInput, FileInput, rem, SegmentedControl, Pagination } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconMessageCircle, IconExternalLink, IconArrowBackUp, IconBrandGithubFilled, IconPhoto, IconClockHour3, IconX } from '@tabler/icons-react';
+import { IconMessageCircle, IconExternalLink, IconArrowBackUp, IconBrandGithubFilled, IconPhoto, IconClockHour3, IconX, IconCheck, IconDownload } from '@tabler/icons-react';
 import { useFoundationModelStore, addFoundationModel, getFoundationModel, APP_STATUS } from 'store/foundationModel';
 import { FORM_WIDTH } from 'constants/index';
 import { FOUNDATION_MODEL_TEMPLATES, AGENTCRAFT_FM_PREFIX } from 'constants/foundation-model';
@@ -163,68 +163,78 @@ async function Add(name:string,tag:string) {
         autoClose: false,
         withCloseButton: false,
       });
-    fetch("/api/ollama/pull",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:`${name}:${tag}`})}).then(function (response) {
-        // 本次请求总的数据长度
-        let contentLength = response.headers.get('Content-Length');
-        var getStream = function (reader: ReadableStreamDefaultReader) {
-            return reader.read().then(function (result) {
-                // If data has been read completely, directly return
-                if (result.done) {
+    async function* streamingFetch( url:string,data:Object ) {
+
+        const response = await fetch(url,data);
+        // Attach Reader
+        const reader = response.body?.getReader();
+        while (true) {
+            // wait for next encoded chunk
+            const { done, value } = await reader?.read() || {done:true};
+             // check if stream is done
+            if (done) break;
+            // Decodes data chunk and yields it
+            yield (new TextDecoder().decode(value));
+        }
+    }
+    let streamResponse = streamingFetch( "/api/ollama/pull",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:`${name}:${tag}`})});
+    let remain="";
+    for await ( let chunk of streamResponse) {
+        chunk=remain+chunk;
+        let lines=chunk.split("\n");
+        for(let i=0;i<lines.length;i++){
+            try {
+                let data=JSON.parse(lines[i]);
+                if(data.code && data.code!=200){
+                    notifications.update({
+                        id: `Create Model ${name}:${tag}`,
+                        loading: false,
+                        title: `Create Model ${name}:${tag}`,
+                        message: `Ollama pull failed: ${data.message}`,
+                        color:'red',
+                        autoClose: true,
+                        withCloseButton: true,
+                      });
                     return;
                 }
-                // Extract this segment of data (binary format)
-                var chunk = result.value;
-                var text = '';
-                // // Assume data is UTF-8 encoded, the first three bytes are data headers,
-                // // and each character occupies one byte (i.e., all English characters)
-                for (var i = 0; i < chunk.byteLength; i++) {
-                    text += String.fromCharCode(chunk[i]);
+                else if(data.status){
+                    if( data.status=='success'){
+                        notifications.update({
+                            id: `Create Model ${name}:${tag}`,
+                            loading: false,
+                            title: `Create Model ${name}:${tag}`,
+                            message: `Ollama pull success`,
+                            color:'green',
+                            autoClose: true,
+                            withCloseButton: true,
+                            icon:<IconCheck />,
+                        })
+                        return 
+                    }
+                    notifications.update({
+                        id: `Create Model ${name}:${tag}`,
+                        loading: true,
+                        title: `Create Model ${name}:${tag}`,
+                        message: data.status+data.total?(data.finished?data.finished:'0')+`/${data.total}`:'',
+                        autoClose: false,
+                        withCloseButton: false,
+                      });
+                    console.log(Date.now(), data ,data.status)
                 }
-                // // Append this segment of data to the web page
-                // document.getElementById('content')?.innerHTML += text;
-                // // Calculate the current progress
-                // progress += chunk.byteLength;
-                // console.log(((progress / contentLength) * 100) + '%');
-                // Recursively handle the next segment of data
-                notifications.update({
-                    id: `Create Model ${name}:${tag}`,
-                    loading: true,
-                    title: `Create Model ${name}:${tag}`,
-                    message: text,
-                    autoClose: false,
-                    withCloseButton: false,
-                  });
-                console.log(chunk);
-                return getStream(reader);
-            });
-        };
-            // return reader.read().then(function (result) {
-            //     // 如果数据已经读取完毕，直接返回
-            //     if (result.done) {
-            //       return;
-            //     }
-            //     // 取出本段数据（二进制格式）
-            //     var chunk = result.value;
-            //     var text = '';
-            //     // 假定数据是UTF-8编码，前三字节是数据头，
-            //     // 而且每个字符占据一个字节（即都为英文字符）
-            //     for (var i = 3; i < chunk.byteLength; i++) {
-            //       text += String.fromCharCode(chunk[i]);
-            //     }
-            //     // 将本段数据追加到网页之中
-            //     document.getElementById('content')?.innerHTML += text;
-            //     // 计算当前进度
-            //     progress += chunk.byteLength;
-            //     console.log(((progress / contentLength) * 100) + '%');
-            //     // 递归处理下一段数据
-            //     return getStream(reader);
-            //   };
-        // };
-        return getStream(response.body?.getReader());
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+                else{
+                    console.log(Date.now(), data )
+                }
+            } catch (error) {
+                if(i==lines.length-1){
+                    remain=lines[i];
+                }
+                else{
+                    console.error(`Parse error: ${lines[i]}`);
+                }
+            }
+        }
+        
+    }
     // request(,{method:"POST",data:{name:}})
 }
 
@@ -241,7 +251,7 @@ function FoundationModelTab() {
     const [activePage,setPage]=useState(1);
     const getPagecontent = async (p=0,l=20) => {
         let res = await request(`/api/ollama/search?q=${form.values.q}&c=${form.values.c}&p=${p}&l=${l}`);
-        for(let j=0;j<res.data.data.length;j++) {
+        for(let j=0;j<res.data?.data?.length;j++) {
             res.data.data[j].tags=res.data.data[j].tags.map((element:Array<any>)=>({label:element[0],value:element[0],size:element[1]}));
             res.data.data[j].currentTag=res.data.data[j].tags[0]?.label || 'unavailable';
         }
@@ -265,15 +275,15 @@ function FoundationModelTab() {
         )
       );
     useEffect(()=>{
-        getPagecontent(activePage)
+        getPagecontent(activePage-1)
     },[form.values.q, form.values.c,activePage])
-    return <Box pos="relative" pb={124} mt={12}>
-        <Tabs variant="outline" defaultValue="text2text">
+    return <Flex pos="relative" pb={12} mt={12} style={{overflow:'auto'}}>
+        <Tabs variant="outline" defaultValue="text2text" style={{height:'100%',display:'flex',flexDirection:'column'}}>
             <Tabs.List style={{borderBottom:'solid thin lightgray'}}>
                 <Tabs.Tab value="text2text" icon={<IconMessageCircle size="0.8rem" />}>Ollama</Tabs.Tab>
                 {/* <Tabs.Tab value="text2img" icon={<IconMessageCircle size="0.8rem" />}>Huggingface</Tabs.Tab> */}
             </Tabs.List>
-            <Tabs.Panel value="text2text" pt="xs">
+            <Tabs.Panel value="text2text" pt="xs" style={{height:'100%',overflow:'hidden',display:'flex',flexDirection:'column'}} >
                 <Flex direction={'column'} style={{width:600,margin:'auto',paddingTop:'10px'}} ><TextInput placeholder="Search models" {...form.getInputProps('q')} />
                 <SegmentedControl
                 
@@ -292,16 +302,17 @@ function FoundationModelTab() {
                 <Flex
                     mih={50}
                     gap="md"
-                    justify="flex-start"
+                    justify="space-around"
                     align="flex-start"
                     direction="row"
                     wrap="wrap"
-                    pb={120}
+                    pb={12}
+                    style={{overflow:'auto'}}
                 >
 
                     {pagecontent?pagecontent.data?.map((item: any, index: number) => {
                         // console.log(item)
-                        return <Card shadow="sm" padding="lg" radius="md" withBorder style={{ width: 320 }} mr={12} key={`template-${index}`}>
+                        return <Card shadow="sm" padding="lg" radius="md" withBorder style={{ width: 340 }} mr={12} key={`template-${index}`}>
                             {/* <Card.Section >
                                 {item.icon ? <Image
                                     src={item.icon}
@@ -316,11 +327,9 @@ function FoundationModelTab() {
                             </Card.Section> */}
                             <Group mb={0} h={45} >
                                 <Text weight={700} align={'center'} style={{ textAlign: 'center', width: '100%' }}>{item.name}</Text>
-                                {/* {
-                                    item.githubLink ? <a href={item.githubLink} target="_blank"><IconBrandGithubFilled /></a> : null
-                                } */}
+      
                             </Group>
-                            <Flex justify={'center'}> <IconClockHour3  color="gray" size="1rem" /><Text size="xs" color="dimmed" ml={10}>  Updated on {item.updated.split("T")[0]}</Text></Flex>
+                            <Flex justify={'center'} align={'center'}><IconDownload color="gray" size="1rem" /> <Text size="sm" color="dimmed" ml={10} mr={10}>  {(()=>{let x=Math.floor(Math.log10(item.pulls)/3); return Math.floor(item.pulls/10**(3*x-1))/10+" KMGTPE"[x]})()}</Text> <IconClockHour3  color="gray" size="1rem"  /><Text size="sm" color="dimmed" ml={10}>  Updated on {item.updated.split("T")[0]}</Text></Flex>
 
                             <Box mt={5}>
                                 {item.labels.map((tag:string) => {
@@ -353,8 +362,9 @@ function FoundationModelTab() {
                             </Flex>
                         </Card>
                     }):null}
-                </Flex>
-                <Pagination value={activePage} onChange={setPage} total={Math.floor(pagecontent.total/20)+1} />
+                                    
+
+                </Flex><Pagination  mt={12} value={activePage} onChange={setPage} total={Math.floor((pagecontent.total-1)/20)+1} />
             </Tabs.Panel>
 {/* 
             <Tabs.Panel value="text2img" pt="xs">
@@ -393,7 +403,7 @@ function FoundationModelTab() {
                 </Flex>
             </Tabs.Panel> */}
         </Tabs>
-    </Box>
+    </Flex>
 }
 
 export function CreateFoundationModel() {
